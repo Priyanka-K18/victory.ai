@@ -15,6 +15,7 @@ import {
   Check
 } from 'lucide-react';
 import { soundFX } from '../../utils/audio';
+import { useAuth } from '../../context/AuthContext';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -64,11 +65,14 @@ export const PersonalizedOnboardingModal: React.FC<OnboardingModalProps> = ({
     { id: 'Personal Learning', desc: 'Master the bleeding edge of AI out of pure curiosity and personal leverage.' },
   ];
 
+  const { updatePreferences } = useAuth();
+
   const handleNext = () => {
     soundFX.playClick();
     if (step < 4) {
       setStep((prev) => (prev + 1) as 1 | 2 | 3 | 4);
     } else {
+      updatePreferences({ interest, level, goal });
       onCompletePath({ interest, level, goal });
       onClose();
     }

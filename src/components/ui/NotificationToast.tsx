@@ -12,7 +12,7 @@ import { soundFX } from '../../utils/audio';
 
 export interface ToastItem {
   id: string;
-  type: 'PROJECT COMPLETED' | 'NEW CHALLENGE' | 'LEARNING STREAK' | 'AI TOOL UPDATE' | 'NEW LESSON' | 'MENTOR FEEDBACK';
+  type: 'PROJECT COMPLETED' | 'NEW CHALLENGE' | 'LEARNING STREAK' | 'AI TOOL UPDATE' | 'NEW LESSON' | 'MENTOR FEEDBACK' | 'AUTH' | 'WAITLIST';
   title: string;
   message: string;
 }
@@ -50,6 +50,10 @@ export const NotificationToast: React.FC<NotificationToastProps> = ({
         return <BookOpen className="w-4 h-4 text-sky-400" />;
       case 'MENTOR FEEDBACK':
         return <Bot className="w-4 h-4 text-indigo-400" />;
+      case 'AUTH':
+        return <Sparkles className="w-4 h-4 text-cyan-400" />;
+      case 'WAITLIST':
+        return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
     }
   };
 

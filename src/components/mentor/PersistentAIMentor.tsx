@@ -20,6 +20,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { soundFX } from '../../utils/audio';
+import { backendService } from '../../services/backendService';
 
 type MentorMode = 
   | 'EXPLAIN' 
@@ -149,6 +150,7 @@ export const PersistentAIMentor: React.FC<PersistentAIMentorProps> = ({
     if (!query.trim()) return;
 
     soundFX.playClick();
+    backendService.logMentorMessage('user', query, getContextName());
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       sender: 'user',
@@ -192,6 +194,8 @@ export const PersistentAIMentor: React.FC<PersistentAIMentorProps> = ({
         }
       }
 
+      backendService.logMentorMessage('assistant', reply, getContextName());
+
       setMessages((prev) => [
         ...prev,
         {
@@ -203,7 +207,7 @@ export const PersistentAIMentor: React.FC<PersistentAIMentorProps> = ({
           timestamp: 'Just now'
         }
       ]);
-    }, 1000);
+    }, 1100);
   };
 
   const modes: { id: MentorMode; label: string; icon: React.ComponentType<{ className?: string }> }[] = [

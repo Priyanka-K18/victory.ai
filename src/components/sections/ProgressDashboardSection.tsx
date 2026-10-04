@@ -16,21 +16,18 @@ import {
   Layers,
   BookOpen
 } from 'lucide-react';
-import { ConstellationCanvas, ConstellationNode } from '../canvas/ConstellationCanvas';
+import { ConstellationCanvas } from '../canvas/ConstellationCanvas';
 import { soundFX } from '../../utils/audio';
+import { useAuth } from '../../context/AuthContext';
 
 export const ProgressDashboardSection: React.FC<{
   onContinueLearning?: () => void;
   onOpenProject?: (projectTitle: string) => void;
 }> = ({ onContinueLearning, onOpenProject }) => {
+  const { profile } = useAuth();
   const [selectedSkill, setSelectedSkill] = useState<{
-    id: string;
-    name: string;
-    level: string;
-    lessons: string;
-    projects: string[];
-    tools: string[];
-    nextMilestone: string;
+    id: string; name: string; level: string; lessons: string;
+    projects: string[]; tools: string[]; nextMilestone: string;
   }>({
     id: 'ai-tools',
     name: 'AI TOOLS',
@@ -146,7 +143,9 @@ export const ProgressDashboardSection: React.FC<{
               MY AI COMMAND CENTER
             </h2>
             <p className="text-xs sm:text-sm text-slate-300 font-body mt-1">
-              Welcome back, Builder 👋 · You are on a <strong className="text-amber-400 font-mono-code">18-day streak</strong>. Ready to advance your current mission?
+              Welcome back, <strong className="text-cyan-300">{profile?.full_name || 'Builder'}</strong> 👋 · You are on a{' '}
+              <strong className="text-amber-400 font-mono-code">{profile?.streak_days ?? 18}-day streak</strong> ·{' '}
+              <strong className="text-purple-400 font-mono-code">⚡ {(profile?.xp ?? 1250).toLocaleString()} XP</strong>
             </p>
           </div>
 

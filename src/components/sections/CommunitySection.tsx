@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   Heart, 
@@ -11,15 +11,26 @@ import {
 import { COMMUNITY_POSTS } from '../../data/mockData';
 import { CommunityPost } from '../../types';
 import { soundFX } from '../../utils/audio';
+import { backendService } from '../../services/backendService';
 
 export const CommunitySection: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'project' | 'prompt' | 'workflow' | 'experiment'>('all');
   const [posts, setPosts] = useState<CommunityPost[]>(COMMUNITY_POSTS);
 
+  // Fetch from Supabase backend on mount
+  useEffect(() => {
+    backendService.getCommunityPosts().then((dbPosts) => {
+      if (dbPosts && dbPosts.length > 0) {
+        setPosts(dbPosts);
+      }
+    });
+  }, []);
+
   const filteredPosts = posts.filter(p => activeFilter === 'all' || p.type === activeFilter);
 
   const handleLikePost = (id: string) => {
     soundFX.playClick();
+    backendService.likeCommunityPost(id);
     setPosts(prev => prev.map(p => {
       if (p.id === id) {
         return { ...p, likes: p.likes + 1 };

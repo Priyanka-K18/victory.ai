@@ -52,11 +52,19 @@
     overflow-x: hidden;
     background: var(--bg-deep);
     min-height: 100vh;
-    cursor: none !important;
+    /* Custom cursor is rendered by ScannerCursor component */
+    cursor: none;
   }
 
-  button, a, [role="button"], input, select, textarea {
-    cursor: none !important;
+  /* Keep pointer cursor available so browser routes click events correctly.
+     The visual cursor is the ScannerCursor — we just hide the system cursor shape. */
+  button, a, [role="button"] {
+    cursor: none;
+  }
+
+  input, select, textarea {
+    /* Inputs need the text cursor for UX — allow system cursor on focus */
+    cursor: auto;
   }
 }
 

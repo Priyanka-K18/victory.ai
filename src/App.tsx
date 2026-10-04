@@ -28,19 +28,32 @@ import { PersistentAIMentor } from './components/mentor/PersistentAIMentor';
 import { CommandPalette } from './components/search/CommandPalette';
 import { NotificationToast, ToastItem } from './components/ui/NotificationToast';
 import { KineticTickerBar } from './components/common/KineticTickerBar';
+import { AuthModal } from './components/auth/AuthModal';
 
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProjectLabItem } from './types';
 import { PROJECT_LAB_ITEMS } from './data/mockData';
 import { soundFX } from './utils/audio';
+import { AdminDashboard } from './components/admin/AdminDashboard';
 
-export function App() {
+function MainApp() {
+  const { profile, awardXp } = useAuth();
   const [activeSection, setActiveSection] = useState('hero');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [activeWorkspaceProject, setActiveWorkspaceProject] = useState<ProjectLabItem | null>(null);
   const [activeLesson, setActiveLesson] = useState<{ toolName: string; category: string } | null>(null);
   const [completedProjects, setCompletedProjects] = useState<string[]>([]);
   const [currentToast, setCurrentToast] = useState<ToastItem | null>(null);
+
+  // Sync completed projects from Supabase profile if present
+  useEffect(() => {
+    if (profile?.completed_projects && profile.completed_projects.length > 0) {
+      setCompletedProjects(profile.completed_projects);
+    }
+  }, [profile]);
 
   // Smooth scrolling with Lenis
   useEffect(() => {
@@ -105,15 +118,19 @@ export function App() {
     }
   };
 
-  const handleCompleteProject = (projectId: string) => {
+  const handleCompleteProject = async (projectId: string) => {
     soundFX.playSuccess();
-    setCompletedProjects(prev => [...new Set([...prev, projectId])]);
+    setCompletedProjects((prev) => [...new Set([...prev, projectId])]);
     setActiveWorkspaceProject(null);
+    
+    // Save to Supabase backend & award XP
+    await awardXp(1200, projectId);
+
     setCurrentToast({
       id: Date.now().toString(),
       type: 'PROJECT COMPLETED',
       title: 'Project Verified & Deployed',
-      message: 'Your project has been added to your verified 3D portfolio (+1,200 XP)!'
+      message: 'Your project has been recorded in Supabase and added to your verified 3D portfolio (+1,200 XP)!',
     });
   };
 
@@ -122,35 +139,39 @@ export function App() {
     setCurrentToast({
       id: Date.now().toString(),
       type: 'LEARNING STREAK',
-      title: 'Personalized Path Activated',
-      message: `Roadmap tailored for ${summary.level} in ${summary.interest} aiming for ${summary.goal}.`
+      title: 'Personalized Path Activated in Supabase',
+      message: `Roadmap tailored for ${summary.level} in ${summary.interest} aiming for ${summary.goal}.`,
     });
     scrollToSection('creator-flow');
   };
 
-  const handleLaunchProjectFromTitle = (title: string) => {
+  const handleLaunchProjectFromTitle = (title?: string) => {
     soundFX.playClick();
-    const match = PROJECT_LAB_ITEMS.find(p => p.title.toLowerCase().includes(title.toLowerCase())) || PROJECT_LAB_ITEMS[0];
+    const match = title
+      ? PROJECT_LAB_ITEMS.find((p) => p.title.toLowerCase().includes(title.toLowerCase())) || PROJECT_LAB_ITEMS[0]
+      : PROJECT_LAB_ITEMS[0];
     setActiveWorkspaceProject(match);
   };
 
   return (
     <div
       className="relative min-h-screen text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-200"
-      style={{ background: '#05070d', cursor: 'none' }}
+      style={{ background: '#05070d' }}
     >
-      {/* 1. Intelligent Custom Cursor with Scanning Reticle and Dynamic Labels */}
+      {/* 1. Custom Scanning Cursor */}
       <ScannerCursor />
 
-      {/* 2. Primary Navigation Bar */}
+      {/* 2. Navigation Bar with Supabase Auth & Live Status */}
       <Navbar
         onOpenSearch={() => setIsSearchOpen(true)}
         onNavigateSection={scrollToSection}
         activeSection={activeSection}
         onOpenOnboarding={() => setIsOnboardingOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenAdmin={() => setIsAdminOpen(true)}
       />
 
-      {/* 3. Global Command Palette (⌘K) — Searches tools, lessons, projects, prompts */}
+      {/* 3. Global Command Palette (⌘K) */}
       <CommandPalette
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
@@ -159,20 +180,39 @@ export function App() {
         }}
       />
 
-      {/* 4. Subtle Notification Toast Alert (Section 35) */}
+      {/* Admin Dashboard Overlay */}
+      {isAdminOpen && (
+        <AdminDashboard onClose={() => setIsAdminOpen(false)} />
+      )}
+
+      {/* 4. Notification Toast Alert */}
       <NotificationToast
         toast={currentToast}
         onDismiss={() => setCurrentToast(null)}
       />
 
-      {/* 5. Personalized Onboarding Modal (Section 8) */}
+      {/* 5. Supabase Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onSuccess={(msg) =>
+          setCurrentToast({
+            id: Date.now().toString(),
+            type: 'AUTH',
+            title: 'Authentication',
+            message: msg,
+          })
+        }
+      />
+
+      {/* 6. Personalized Onboarding Modal */}
       <PersonalizedOnboardingModal
         isOpen={isOnboardingOpen}
         onClose={() => setIsOnboardingOpen(false)}
         onCompletePath={handleOnboardingComplete}
       />
 
-      {/* 6. Interactive "Learn By Doing" Lesson Sandbox (Section 13 & 14) */}
+      {/* 7. Lesson Sandbox */}
       <LessonSandboxModal
         isOpen={!!activeLesson}
         onClose={() => setActiveLesson(null)}
@@ -181,14 +221,14 @@ export function App() {
         onLaunchProjectWorkspace={handleLaunchProjectFromTitle}
       />
 
-      {/* 7. Production Project Workspace Sandbox (Section 21 & 22) */}
+      {/* 8. Production Project Workspace */}
       <WorkspaceModal
         project={activeWorkspaceProject}
         onClose={() => setActiveWorkspaceProject(null)}
         onCompleteProject={handleCompleteProject}
       />
 
-      {/* 8. Persistent Floating AI Learning Mentor (Section 15-18) */}
+      {/* 9. Socratic AI Learning Mentor */}
       <PersistentAIMentor
         currentSection={activeSection}
         activeContextName={
@@ -200,23 +240,32 @@ export function App() {
         }
       />
 
-      {/* Continuous AI Learning Journey — SECTION 44 EXACT FLOW */}
+      {/* Main Pages Flow */}
       <main className="relative z-10">
         
         {/* 1. HERO — "LEARN AI. BUILD REAL THINGS." */}
         <HeroSection
           onStartLearning={() => setIsOnboardingOpen(true)}
           onExploreTools={() => scrollToSection('tools')}
-          onOpenProject={() => scrollToSection('projects')}
+          onOpenProject={handleLaunchProjectFromTitle}
+          onNavigateSection={scrollToSection}
+          onShowToast={(title, message, type) =>
+            setCurrentToast({
+              id: Date.now().toString(),
+              title,
+              message,
+              type,
+            })
+          }
         />
 
-        {/* Social Proof Bar — Animated Stats */}
+        {/* Live Metrics Counter Bar */}
         <SocialProofBar />
 
-        {/* Kinetic Ticker — Platform Identity */}
+        {/* Kinetic Ticker */}
         <KineticTickerBar variant="highlight" />
 
-        {/* 2. HERO USER FLOW — "WHAT DO YOU WANT TO CREATE?" (Section 7) */}
+        {/* 2. CREATOR FLOW — "WHAT DO YOU WANT TO CREATE?" */}
         <WhatDoYouWantToCreate
           onSelectCategory={(cat) => {
             // updates active category
@@ -230,7 +279,7 @@ export function App() {
           onOpenProject={handleLaunchProjectFromTitle}
         />
 
-        {/* 3. AI FOR EVERY FIELD — 9 Cross-Disciplinary Departments (Section 12) */}
+        {/* 3. AI FOR EVERY FIELD */}
         <EveryFieldSection
           onSelectField={(fieldId) => {
             // open details
@@ -240,7 +289,7 @@ export function App() {
           }}
         />
 
-        {/* 4. AI TOOL UNIVERSE & MULTI-STAGE WORKFLOW PIPELINE (Section 9 & 10 & 11) */}
+        {/* 4. AI TOOL UNIVERSE */}
         <ToolGalaxySection
           onSelectToolLearningPath={() => scrollToSection('paths')}
           onLaunchLessonSandbox={(toolName, category) => {
@@ -249,15 +298,15 @@ export function App() {
           onOpenProject={handleLaunchProjectFromTitle}
         />
 
-        {/* Kinetic Ticker — between AI Tools & Learning Path */}
+        {/* Kinetic Ticker */}
         <KineticTickerBar />
 
-        {/* 5. PERSONALIZED 3D LEARNING PATHWAY (Goal -> Skills -> Tools -> Practice -> Project -> Portfolio) */}
+        {/* 5. PERSONALIZED 3D LEARNING PATHWAY */}
         <LearningPathSection
           onLaunchProjectLab={() => scrollToSection('projects')}
         />
 
-        {/* 6. PRODUCTION PROJECT LAB ("BUILD WITH AI" — 9 Project Categories - Section 19 & 20) */}
+        {/* 6. PRODUCTION PROJECT LAB */}
         <ProjectLabSection
           onOpenWorkspace={(project) => {
             soundFX.playClick();
@@ -265,18 +314,18 @@ export function App() {
           }}
         />
 
-        {/* 7. SOCRATIC AI LEARNING MENTOR TERMINAL (Section 15 & 16) */}
+        {/* 7. SOCRATIC AI LEARNING MENTOR */}
         <AIMentorSection />
 
-        {/* 7.5. ACTIVE PEDAGOGY — "DON'T JUST WATCH. BUILD." */}
+        {/* 7.5. ACTIVE PEDAGOGY */}
         <LearnByBuildingSection
           onLaunchBuild={() => scrollToSection('projects')}
         />
 
-        {/* 8. PROMPT LAB — "MASTER THE WAY YOU TALK TO AI" (Section 26) */}
+        {/* 8. PROMPT LAB */}
         <PromptLabSection />
 
-        {/* 9. STUDENT COMMAND CENTER & SKILL CONSTELLATION (Section 24 & 25) */}
+        {/* 9. STUDENT COMMAND CENTER */}
         <ProgressDashboardSection
           onContinueLearning={() => {
             setActiveLesson({ toolName: 'Cursor AI IDE', category: 'CODING' });
@@ -284,23 +333,23 @@ export function App() {
           onOpenProject={handleLaunchProjectFromTitle}
         />
 
-        {/* Kinetic Ticker — between Dashboard & Portfolio */}
+        {/* Kinetic Ticker */}
         <KineticTickerBar variant="highlight" />
 
-        {/* 10. PORTFOLIO BUILDER — "TURN WHAT YOU LEARN INTO PROOF" (Section 23) */}
+        {/* 10. PORTFOLIO BUILDER */}
         <PortfolioSection
           userCompletedProjects={completedProjects}
         />
 
-        {/* 11. CAREER MATRIX — FROM LEARNING TO CAREER (Section 29) */}
+        {/* 11. CAREER MATRIX */}
         <CareerMatrixSection />
 
-        {/* 12. BUILD CHALLENGES (Section 27) */}
+        {/* 12. BUILD CHALLENGES */}
         <div id="challenges">
           <ChallengesSection />
         </div>
 
-        {/* 13. AI BUILDERS COMMUNITY FEED (Section 28) */}
+        {/* 13. COMMUNITY FEED */}
         <div id="community">
           <CommunitySection />
         </div>
@@ -313,9 +362,17 @@ export function App() {
 
       </main>
 
-      {/* Global Platform Footer */}
+      {/* Global Footer */}
       <Footer onNavigateSection={scrollToSection} />
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
   );
 }
 

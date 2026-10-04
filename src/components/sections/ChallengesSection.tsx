@@ -1,15 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Trophy, Clock, Users, ArrowRight, CheckCircle, Zap, Flame, Timer,
+  Trophy, Users, ArrowRight, CheckCircle, Zap, Flame, Timer, Loader2,
 } from 'lucide-react';
-import { CHALLENGES } from '../../data/mockData';
 import { ChallengeItem } from '../../types';
 import { soundFX } from '../../utils/audio';
+import { backendService } from '../../services/backendService';
+import { useAuth } from '../../context/AuthContext';
 
 export const ChallengesSection: React.FC = () => {
-  const [joinedId, setJoinedId] = useState<string | null>(null);
-  const [visible, setVisible]   = useState(false);
+  const { user, profile } = useAuth();
+  const [challenges, setChallenges] = useState<ChallengeItem[]>([]);
+  const [loadingChallenges, setLoadingChallenges] = useState(true);
+  const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
+  const [visible, setVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    backendService.getChallenges().then((data) => {
+      setChallenges(data);
+      setLoadingChallenges(false);
+    });
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -20,9 +31,15 @@ export const ChallengesSection: React.FC = () => {
     return () => observer.disconnect();
   }, []);
 
-  const handleJoin = (challenge: ChallengeItem) => {
+  const handleJoin = async (challenge: ChallengeItem) => {
     soundFX.playSuccess();
-    setJoinedId(challenge.id);
+    setJoinedIds(prev => new Set([...prev, challenge.id]));
+    const userId = user?.id || profile?.id || 'guest_user';
+    await backendService.joinChallenge(userId, challenge.id);
+    // Optimistically update participant count
+    setChallenges(prev => prev.map(c =>
+      c.id === challenge.id ? { ...c, participantsCount: c.participantsCount + 1 } : c
+    ));
   };
 
   return (
@@ -81,9 +98,15 @@ export const ChallengesSection: React.FC = () => {
         </div>
 
         {/* Challenge cards */}
+        {loadingChallenges ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+            <span className="ml-3 text-slate-400 font-mono-code text-sm">Loading challenges from Supabase...</span>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-          {CHALLENGES.map((challenge, idx) => {
-            const isJoined = joinedId === challenge.id;
+          {challenges.map((challenge, idx) => {
+            const isJoined = joinedIds.has(challenge.id);
             return (
               <div
                 key={challenge.id}
@@ -231,6 +254,7 @@ export const ChallengesSection: React.FC = () => {
             );
           })}
         </div>
+        )}
       </div>
 
       {/* Bottom divider */}
