@@ -315,5 +315,234 @@
 .section-fade-top    { mask-image: linear-gradient(to top, black 70%, transparent 100%);    -webkit-mask-image: linear-gradient(to top, black 70%, transparent 100%); }
 
 /* ── Selection & focus ─────────────────────────────────────────────── */
+/* ── Selection & focus ─────────────────────────────────────────────── */
 ::selection { background: rgba(99,179,237,0.2); color: #f0f2f8; }
 :focus-visible { outline: 2px solid rgba(99,179,237,0.5); outline-offset: 3px; border-radius: 4px; }
+
+/* ── Scroll Reveal System ──────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-32px);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-left[data-visible="true"] {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(32px);
+  transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-right[data-visible="true"] {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-scale[data-visible="true"] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Stagger children reveals */
+.reveal-children > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal-children[data-visible="true"] > *:nth-child(1)  { opacity:1; transform:translateY(0); transition-delay:0.03s; }
+.reveal-children[data-visible="true"] > *:nth-child(2)  { opacity:1; transform:translateY(0); transition-delay:0.10s; }
+.reveal-children[data-visible="true"] > *:nth-child(3)  { opacity:1; transform:translateY(0); transition-delay:0.17s; }
+.reveal-children[data-visible="true"] > *:nth-child(4)  { opacity:1; transform:translateY(0); transition-delay:0.24s; }
+.reveal-children[data-visible="true"] > *:nth-child(5)  { opacity:1; transform:translateY(0); transition-delay:0.31s; }
+.reveal-children[data-visible="true"] > *:nth-child(6)  { opacity:1; transform:translateY(0); transition-delay:0.38s; }
+.reveal-children[data-visible="true"] > *:nth-child(7)  { opacity:1; transform:translateY(0); transition-delay:0.45s; }
+.reveal-children[data-visible="true"] > *:nth-child(8)  { opacity:1; transform:translateY(0); transition-delay:0.52s; }
+.reveal-children[data-visible="true"] > *:nth-child(9)  { opacity:1; transform:translateY(0); transition-delay:0.59s; }
+.reveal-children[data-visible="true"] > *:nth-child(10) { opacity:1; transform:translateY(0); transition-delay:0.66s; }
+
+/* ── 3D Tilt Cards ─────────────────────────────────────────────────── */
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1), box-shadow 0.4s ease;
+  will-change: transform;
+}
+.tilt-card:hover {
+  transform: perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(12px);
+}
+
+/* ── Neon glow pulse rings ─────────────────────────────────────────── */
+@keyframes ring-expand {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+.ring-pulse::before, .ring-pulse::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  border: 1px solid rgba(99,179,237,0.4);
+  animation: ring-expand 2.5s linear infinite;
+}
+.ring-pulse::after { animation-delay: 1.25s; }
+
+/* ── Kinetic text ticker ───────────────────────────────────────────── */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+  mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+.ticker-inner {
+  display: inline-flex;
+  animation: ticker-scroll 28s linear infinite;
+}
+.ticker-inner:hover { animation-play-state: paused; }
+
+/* ── Glowing line dividers ─────────────────────────────────────────── */
+.glow-divider {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(56,189,248,0.5) 25%,
+    rgba(129,140,248,0.4) 50%,
+    rgba(192,132,252,0.3) 75%,
+    transparent 100%
+  );
+  position: relative;
+}
+.glow-divider::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: inherit;
+  filter: blur(4px);
+  opacity: 0.6;
+}
+
+/* ── Premium animated border ──────────────────────────────────────── */
+@keyframes border-flow {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+.animated-border {
+  position: relative;
+}
+.animated-border::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(270deg,
+    rgba(56,189,248,0.7),
+    rgba(129,140,248,0.5),
+    rgba(192,132,252,0.6),
+    rgba(56,189,248,0.7)
+  );
+  background-size: 300% 300%;
+  animation: border-flow 5s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.animated-border:hover::before { opacity: 1; }
+
+/* ── Text glitch effect ────────────────────────────────────────────── */
+@keyframes glitch-shift-1 {
+  0%, 100% { clip-path: inset(0 0 95% 0); transform: translate(-4px, 0); }
+  20%       { clip-path: inset(30% 0 50% 0); transform: translate(4px, 0); }
+  40%       { clip-path: inset(60% 0 20% 0); transform: translate(-2px, 0); }
+  60%       { clip-path: inset(15% 0 70% 0); transform: translate(3px, 0); }
+  80%       { clip-path: inset(80% 0 5% 0);  transform: translate(-3px, 0); }
+}
+@keyframes glitch-shift-2 {
+  0%, 100% { clip-path: inset(90% 0 0% 0);  transform: translate(4px, 0); }
+  25%       { clip-path: inset(45% 0 40% 0); transform: translate(-4px, 0); }
+  50%       { clip-path: inset(10% 0 80% 0); transform: translate(3px, 0); }
+  75%       { clip-path: inset(70% 0 10% 0); transform: translate(-2px, 0); }
+}
+.text-glitch {
+  position: relative;
+  display: inline-block;
+}
+.text-glitch::before,
+.text-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  color: inherit;
+}
+.text-glitch::before {
+  color: rgba(56,189,248,0.8);
+  animation: glitch-shift-1 6s step-end infinite;
+}
+.text-glitch::after {
+  color: rgba(192,132,252,0.8);
+  animation: glitch-shift-2 6s step-end infinite;
+  animation-delay: 0.5s;
+}
+
+/* ── Morphing blob background ─────────────────────────────────────── */
+@keyframes blob-morph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25%       { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50%       { border-radius: 50% 60% 20% 80% / 25% 80% 30% 65%; }
+  75%       { border-radius: 70% 30% 50% 50% / 30% 50% 60% 40%; }
+}
+.animate-blob { animation: blob-morph 15s ease-in-out infinite; }
+.animate-blob-slow { animation: blob-morph 22s ease-in-out infinite reverse; }
+
+/* ── Live status indicator ─────────────────────────────────────────── */
+@keyframes status-live {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.6); }
+  70%       { box-shadow: 0 0 0 8px rgba(52,211,153,0); }
+}
+.status-live { animation: status-live 2s ease-out infinite; }
+
+/* ── Terminal cursor blink ─────────────────────────────────────────── */
+@keyframes term-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+.term-cursor { 
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: rgba(56,189,248,0.9);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: term-blink 1s step-end infinite;
+}
+
+/* ── Gradient mesh backgrounds ─────────────────────────────────────── */
+.mesh-bg-1 {
+  background:
+    radial-gradient(at 20% 30%, rgba(56,189,248,0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 70%, rgba(129,140,248,0.07) 0px, transparent 50%),
+    radial-gradient(at 50% 10%, rgba(192,132,252,0.05) 0px, transparent 50%);
+}
+.mesh-bg-2 {
+  background:
+    radial-gradient(at 80% 20%, rgba(56,189,248,0.07) 0px, transparent 50%),
+    radial-gradient(at 20% 80%, rgba(52,211,153,0.06) 0px, transparent 50%),
+    radial-gradient(at 60% 50%, rgba(251,191,36,0.04) 0px, transparent 50%);
+}
+

@@ -7,210 +7,328 @@ import {
   CheckCircle2, 
   ShieldCheck, 
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  Target,
+  Play,
+  Rocket,
+  Compass,
+  Bot,
+  Layers,
+  BookOpen
 } from 'lucide-react';
 import { ConstellationCanvas, ConstellationNode } from '../canvas/ConstellationCanvas';
 import { soundFX } from '../../utils/audio';
 
-export const ProgressDashboardSection: React.FC = () => {
-  const [selectedNode, setSelectedNode] = useState<{
+export const ProgressDashboardSection: React.FC<{
+  onContinueLearning?: () => void;
+  onOpenProject?: (projectTitle: string) => void;
+}> = ({ onContinueLearning, onOpenProject }) => {
+  const [selectedSkill, setSelectedSkill] = useState<{
     id: string;
     name: string;
-    level: number;
-    category: string;
-    description: string;
-    unlockedCapabilities: string[];
+    level: string;
+    lessons: string;
+    projects: string[];
+    tools: string[];
+    nextMilestone: string;
   }>({
     id: 'ai-tools',
     name: 'AI TOOLS',
-    level: 9,
-    category: 'Intelligence',
-    description: 'Mastery across 45+ foundation models, Cursor IDE, Claude 3.7 extended thinking, and agent orchestration.',
-    unlockedCapabilities: ['Repo-wide context injection', 'Multi-modal reasoning', 'Latency tuning']
+    level: 'Advanced (Level 8)',
+    lessons: '18 of 24 Completed',
+    projects: ['Autonomous RAG Engine', 'Vector Search Gateway'],
+    tools: ['Cursor', 'Claude 3.7 Sonnet', 'Pinecone'],
+    nextMilestone: 'Deploy multi-agent orchestrator with LangGraph'
   });
+
+  const skillDetailsMap: Record<string, {
+    name: string;
+    level: string;
+    lessons: string;
+    projects: string[];
+    tools: string[];
+    nextMilestone: string;
+  }> = {
+    python: {
+      name: 'PYTHON FOR AI',
+      level: 'Advanced (Level 9)',
+      lessons: '22 of 25 Completed',
+      projects: ['Async Vector Server', 'FastAPI Microservice'],
+      tools: ['FastAPI', 'PyTorch', 'NumPy'],
+      nextMilestone: 'Tensor parallelism benchmark test'
+    },
+    'ai-tools': {
+      name: 'AI TOOLS',
+      level: 'Advanced (Level 8)',
+      lessons: '18 of 24 Completed',
+      projects: ['Autonomous RAG Engine', 'Vector Search Gateway'],
+      tools: ['Cursor', 'Claude 3.7 Sonnet', 'Pinecone'],
+      nextMilestone: 'Deploy multi-agent orchestrator with LangGraph'
+    },
+    prompting: {
+      name: 'PROMPTING MASTERY',
+      level: 'Expert (Level 9)',
+      lessons: '15 of 15 Completed',
+      projects: ['Zero-Hallucination Schema', 'Defensive Guardrails'],
+      tools: ['Claude 3.7 Extended Thinking', 'Promptfoo'],
+      nextMilestone: 'Publish verified prompt evaluation benchmark'
+    },
+    'web-dev': {
+      name: 'WEB DEVELOPMENT',
+      level: 'Intermediate (Level 7)',
+      lessons: '14 of 20 Completed',
+      projects: ['Neural 3D Web App', 'Streaming Chat UI'],
+      tools: ['Next.js 14', 'React 19', 'Tailwind CSS'],
+      nextMilestone: 'Edge worker caching layer with sub-40ms TTFB'
+    },
+    video: {
+      name: 'VIDEO GENERATION',
+      level: 'Intermediate (Level 6)',
+      lessons: '8 of 12 Completed',
+      projects: ['60-Second Sci-Fi Trailer', 'Neural Voice Commercial'],
+      tools: ['Runway Gen-3', 'ElevenLabs', 'CapCut AI'],
+      nextMilestone: 'Keyframe steering with character reference seed'
+    },
+    design: {
+      name: 'DESIGN & UI SYSTEMS',
+      level: 'Advanced (Level 8)',
+      lessons: '16 of 18 Completed',
+      projects: ['Dark Mode Glassmorphic Kit', 'Spatial 3D Canvas'],
+      tools: ['Midjourney v6', 'Spline 3D', 'Figma AI'],
+      nextMilestone: 'Complete design token handoff to React tokens'
+    },
+    data: {
+      name: 'DATA & RAG',
+      level: 'Intermediate (Level 7)',
+      lessons: '12 of 16 Completed',
+      projects: ['Pinecone Knowledge Base', 'Semantic Reranker'],
+      tools: ['Pinecone', 'OpenAI Embeddings', 'ChromaDB'],
+      nextMilestone: 'Implement Cohere Rerank on 10,000 PDF chunks'
+    },
+    automation: {
+      name: 'AUTOMATION PIPELINES',
+      level: 'Intermediate (Level 6)',
+      lessons: '10 of 14 Completed',
+      projects: ['Zero-Touch Lead Enrichment', 'Support Ticket Bot'],
+      tools: ['n8n AI Nodes', 'Webhooks', 'Make.com'],
+      nextMilestone: 'Self-healing error webhook with Slack notifications'
+    }
+  };
 
   const handleSelectConstellationNode = (node: ConstellationNode) => {
     soundFX.playClick();
-    const descriptions: Record<string, { desc: string; caps: string[] }> = {
-      python: {
-        desc: 'Advanced Python for AI: AsyncIO event loops, FastAPI microservices, and NumPy/PyTorch tensor manipulations.',
-        caps: ['Custom embeddings server', 'FastAPI microservices', 'Batch inference pipelines']
-      },
-      'ai-tools': {
-        desc: 'Deep mastery across foundation models, Cursor IDE, Claude 3.7 extended thinking, and prompt chain debuggers.',
-        caps: ['Repo-wide context injection', 'Multi-modal reasoning', 'Latency tuning']
-      },
-      prompting: {
-        desc: 'Deterministic prompt engineering adhering to the 7 structural pillars and Zod runtime schema validation.',
-        caps: ['Self-reflecting reasoning loops', 'Zero hallucination schemas', 'Defensive security prompts']
-      },
-      'web-dev': {
-        desc: 'Modern full-stack React 19, Next.js App Router, Tailwind CSS, and low-latency Server-Sent Events (SSE).',
-        caps: ['Optimistic streaming UI', 'Edge functions', 'WebGL 3D canvas integration']
-      },
-      design: {
-        desc: 'Spatial UI design systems, Midjourney 3D lighting, accessible color tokens, and Figma AI pipelines.',
-        caps: ['Generative dark mode systems', 'Spatial 3D meshes', 'Micro-animation choreographies']
-      },
-      video: {
-        desc: 'Virtual cinematography in Runway Gen-3, prompt-directed camera vectors, ElevenLabs audio mastering.',
-        caps: ['4K narrative shorts', 'Temporal keyframe steering', 'Voice cloning synchronization']
-      },
-      automation: {
-        desc: 'Self-hosted n8n workflows, event-driven webhooks, autonomous LangChain tool-calling nodes.',
-        caps: ['24/7 lead scoring agents', 'Automated customer support routing', 'Multi-app sync']
-      }
-    };
-
-    const extra = descriptions[node.id] || {
-      desc: 'Advanced skills in AI technology and real-world system architecture.',
-      caps: ['Production ready', 'Verified in portfolio']
-    };
-
-    setSelectedNode({
-      id: node.id,
+    const match = skillDetailsMap[node.id] || {
       name: node.name,
-      level: node.level,
-      category: node.category,
-      description: extra.desc,
-      unlockedCapabilities: extra.caps
-    });
+      level: `Level ${node.level}`,
+      lessons: `${node.level * 2} Completed`,
+      projects: ['Flagship Practice Lab'],
+      tools: ['Cursor', 'Claude 3.7'],
+      nextMilestone: 'Ship verified portfolio capstone'
+    };
+    setSelectedSkill({ id: node.id, ...match });
   };
 
   return (
-    <section className="relative py-28 px-4 sm:px-6 bg-[#030611] overflow-hidden">
-      
+    <section 
+      id="dashboard"
+      className="relative py-28 px-4 sm:px-6 bg-[#030611] overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto relative z-10">
         
-        {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono-code mb-4">
-            <Zap className="w-3.5 h-3.5" />
-            <span>NEURAL PROGRESS ENGINE</span>
+        {/* Top: Welcome back & Command Center Header (Section 24) */}
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-12 pb-8 border-b border-white/[0.08]">
+          <div>
+            <div className="flex items-center gap-2 mb-2 text-xs font-mono-code text-cyan-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>ACTIVE LEARNING SESSION</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-display font-black text-white tracking-tight uppercase">
+              MY AI COMMAND CENTER
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 font-body mt-1">
+              Welcome back, Builder 👋 · You are on a <strong className="text-amber-400 font-mono-code">18-day streak</strong>. Ready to advance your current mission?
+            </p>
           </div>
 
-          <h2 className="text-4xl sm:text-6xl font-display font-black text-white tracking-tight uppercase mb-4">
-            SKILL CONSTELLATION <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">& XP</span>
-          </h2>
-          
-          <p className="text-base sm:text-lg text-slate-400 font-body">
-            Track your real-time skills in 3D celestial space. Higher proficiency expands your star's magnitude and unlocks deeper project blueprints.
-          </p>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                soundFX.playClick();
+                onContinueLearning?.();
+              }}
+              className="px-6 py-3 rounded-xl font-body font-bold text-xs uppercase tracking-wider text-slate-950 bg-gradient-to-r from-cyan-400 to-sky-400 flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95 transition-transform"
+            >
+              <Play className="w-3.5 h-3.5 fill-slate-950" />
+              <span>Continue Learning</span>
+            </button>
+          </div>
         </div>
 
-        {/* Top 4 Stat Widgets */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        {/* Current Mission & Quick Overview Cards (Section 24) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
           
-          <div className="p-5 rounded-2xl bg-[#060a17] border border-white/10 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 flex items-center justify-center shrink-0">
-              <Zap className="w-6 h-6" />
-            </div>
+          {/* CURRENT MISSION */}
+          <div className="p-5 rounded-3xl bg-white/[0.025] border border-white/10 flex flex-col justify-between">
             <div>
-              <div className="text-2xl font-display font-bold text-white">4,850 XP</div>
-              <div className="text-[11px] font-mono-code text-cyan-400 uppercase">Level 8 AI Architect</div>
+              <div className="flex items-center justify-between text-[10px] font-mono-code text-slate-400 mb-2">
+                <span className="text-cyan-400 font-bold uppercase">CURRENT MISSION</span>
+                <span>Sprint 03 / 06</span>
+              </div>
+              <h4 className="text-base font-display font-bold text-white mb-1.5">
+                RAG Embedding Optimization
+              </h4>
+              <p className="text-xs text-slate-300 font-body leading-relaxed mb-4">
+                Master 512-token chunking strategies and implement Cohere semantic reranking on 500-page SEC financial filings.
+              </p>
+            </div>
+            <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 w-[68%]" />
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#060a17] border border-white/10 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center shrink-0">
-              <Flame className="w-6 h-6" />
-            </div>
+          {/* CURRENT PROJECT */}
+          <div className="p-5 rounded-3xl bg-white/[0.025] border border-white/10 flex flex-col justify-between">
             <div>
-              <div className="text-2xl font-display font-bold text-white">18 Days</div>
-              <div className="text-[11px] font-mono-code text-amber-400 uppercase">Active Coding Streak</div>
+              <div className="flex items-center justify-between text-[10px] font-mono-code text-slate-400 mb-2">
+                <span className="text-emerald-400 font-bold uppercase">CURRENT PROJECT</span>
+                <span>Step 03: BUILD</span>
+              </div>
+              <h4 className="text-base font-display font-bold text-white mb-1.5">
+                Autonomous AI Resume Analyzer
+              </h4>
+              <p className="text-xs text-slate-300 font-body leading-relaxed mb-4">
+                Parsing unstructured PDF resumes with OpenAI structured outputs and calculating cosine match against job descriptions.
+              </p>
             </div>
+            <button
+              onClick={() => onOpenProject?.('AI Resume Analyzer')}
+              className="text-xs font-mono-code text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5"
+            >
+              <span>Resume Workspace Sandbox</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
-          <div className="p-5 rounded-2xl bg-[#060a17] border border-white/10 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="text-2xl font-display font-bold text-white">4 Deployed</div>
-              <div className="text-[11px] font-mono-code text-emerald-400 uppercase">Verified Projects</div>
-            </div>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-[#060a17] border border-white/10 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/30 flex items-center justify-center shrink-0">
-              <Award className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="text-2xl font-display font-bold text-white">Top 2%</div>
-              <div className="text-[11px] font-mono-code text-purple-400 uppercase">Global Builder Rank</div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* 3D Constellation Visualizer + Inspector Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          
-          {/* Left Canvas: 3D Skill Graph (8 Cols) */}
-          <div className="lg:col-span-8 rounded-3xl bg-[#060a19] border border-cyan-500/30 shadow-[0_20px_60px_rgba(0,0,0,0.6)] min-h-[460px] relative overflow-hidden">
-            <div className="absolute top-4 left-4 z-20 px-3 py-1.5 rounded-lg bg-black/60 border border-white/10 text-xs font-mono-code text-cyan-300">
-              Tap any star node to inspect prerequisites & unlocked projects
-            </div>
-
-            <ConstellationCanvas
-              onSelectNode={handleSelectConstellationNode}
-              selectedNodeId={selectedNode.id}
-            />
-          </div>
-
-          {/* Right Panel: Active Star Node Inspector (4 Cols) */}
-          <div className="lg:col-span-4 rounded-3xl bg-[#070d22] border border-white/10 p-6 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[10px] font-mono-code uppercase tracking-wider text-cyan-400 px-2.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30">
-                  {selectedNode.category}
-                </span>
-                <span className="text-xs font-mono-code text-slate-400">
-                  STAR MAGNITUDE: <strong className="text-white">{selectedNode.level}/10</strong>
-                </span>
+          {/* STATS: Streak, Portfolio, Challenges */}
+          <div className="p-5 rounded-3xl bg-white/[0.025] border border-white/10 flex flex-col justify-between">
+            <span className="text-[10px] font-mono-code text-slate-400 uppercase mb-2">
+              ACHIEVEMENT TELEMETRY
+            </span>
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-center gap-1 text-amber-400 mb-0.5">
+                  <Flame className="w-4 h-4 fill-amber-400" />
+                  <span className="text-lg font-display font-black">18</span>
+                </div>
+                <span className="text-[10px] font-mono-code text-slate-400 uppercase">Streak Days</span>
               </div>
 
-              <h3 className="text-2xl font-display font-bold text-white mb-2">
-                {selectedNode.name}
-              </h3>
+              <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-center gap-1 text-emerald-400 mb-0.5">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span className="text-lg font-display font-black">4</span>
+                </div>
+                <span className="text-[10px] font-mono-code text-slate-400 uppercase">Portfolio Proved</span>
+              </div>
+            </div>
+            <div className="mt-3 text-[11px] font-mono-code text-cyan-300 text-center">
+              AI Tools Learned: 12 · Weekly Challenges: 3 Passed
+            </div>
+          </div>
 
-              <p className="text-xs text-slate-300 font-body leading-relaxed mb-6">
-                {selectedNode.description}
-              </p>
+        </div>
 
+        {/* SECTION 25: SKILL VISUALIZATION CONSTELLATION */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2 text-xs font-mono-code font-bold uppercase tracking-wider text-slate-300">
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <span>INTERACTIVE SKILL CONSTELLATION</span>
+            </div>
+            <span className="text-xs font-mono-code text-slate-500">
+              Tap any star to inspect current level & next milestone
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            {/* 3D Constellation (8 cols) */}
+            <div className="lg:col-span-8 rounded-3xl bg-[#060a19] border border-cyan-500/30 shadow-[0_20px_60px_rgba(0,0,0,0.6)] min-h-[460px] relative overflow-hidden">
+              <ConstellationCanvas
+                onSelectNode={handleSelectConstellationNode}
+                selectedNodeId={selectedSkill.id}
+              />
+            </div>
+
+            {/* Selected Skill Details (Section 25: Current level, Lessons, Projects, Tools, Next milestone) */}
+            <div className="lg:col-span-4 rounded-3xl bg-[#070d22] border border-white/10 p-6 flex flex-col justify-between">
               <div>
-                <span className="text-[10px] font-mono-code text-slate-500 uppercase tracking-wider block mb-2">
-                  UNLOCKED ABILITIES:
+                <span className="text-[10px] font-mono-code text-cyan-400 uppercase tracking-widest px-2.5 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 inline-block mb-3">
+                  ACTIVE STAR FOCUS
                 </span>
-                <div className="space-y-2">
-                  {selectedNode.unlockedCapabilities.map((cap, idx) => (
-                    <div 
-                      key={idx}
-                      className="p-2.5 rounded-xl bg-white/5 border border-white/5 text-xs font-mono-code text-cyan-200 flex items-center gap-2"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                      <span>{cap}</span>
+
+                <h3 className="text-2xl font-display font-black text-white mb-1">
+                  {selectedSkill.name}
+                </h3>
+                <div className="text-xs font-mono-code text-emerald-400 mb-6 font-semibold">
+                  {selectedSkill.level} · {selectedSkill.lessons}
+                </div>
+
+                <div className="space-y-4 font-body text-xs">
+                  <div>
+                    <strong className="block text-[10px] font-mono-code uppercase text-slate-500 mb-1">
+                      ACTIVE PROJECTS:
+                    </strong>
+                    <div className="space-y-1">
+                      {selectedSkill.projects.map((p, idx) => (
+                        <div key={idx} className="p-2 rounded-lg bg-white/5 border border-white/5 text-slate-200 font-mono-code text-[11px] flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                          <span>{p}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  <div>
+                    <strong className="block text-[10px] font-mono-code uppercase text-slate-500 mb-1">
+                      PRIMARY TOOLS:
+                    </strong>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedSkill.tools.map((t, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/20 text-cyan-300 font-mono-code text-[10px]">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <strong className="block text-[10px] font-mono-code uppercase text-slate-500 mb-1">
+                      NEXT MILESTONE:
+                    </strong>
+                    <p className="text-slate-300 leading-relaxed bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
+                      {selectedSkill.nextMilestone}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="pt-6 border-t border-white/10 mt-6">
-              <div className="flex justify-between text-xs font-mono-code mb-2">
-                <span className="text-slate-400">Mastery Progress</span>
-                <span className="text-cyan-400 font-bold">{selectedNode.level * 10}%</span>
+              <div className="pt-4 border-t border-white/10 mt-6">
+                <button
+                  onClick={() => {
+                    soundFX.playClick();
+                    onContinueLearning?.();
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-white/10 text-xs font-mono-code flex items-center justify-center gap-2 transition-all"
+                >
+                  <span>Practice In Sandbox</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-              <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-500" 
-                  style={{ width: `${selectedNode.level * 10}%` }}
-                />
-              </div>
+
             </div>
 
           </div>
-
         </div>
 
       </div>

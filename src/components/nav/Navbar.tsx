@@ -18,12 +18,14 @@ interface NavbarProps {
   onOpenSearch: () => void;
   onNavigateSection: (sectionId: string) => void;
   activeSection: string;
+  onOpenOnboarding?: () => void;
 }
 
 const NAV_ITEMS = [
-  { id: 'tools',       label: 'AI Tools' },
+  { id: 'creator-flow', label: 'Create' },
   { id: 'fields',      label: 'Every Field' },
-  { id: 'paths',       label: 'Learning Paths' },
+  { id: 'tools',       label: 'AI Tools' },
+  { id: 'paths',       label: 'Roadmap' },
   { id: 'projects',    label: 'Project Lab' },
   { id: 'mentor',      label: 'AI Mentor' },
   { id: 'prompt-lab',  label: 'Prompt Lab' },
@@ -36,6 +38,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSearch,
   onNavigateSection,
   activeSection,
+  onOpenOnboarding,
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -131,13 +134,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={() => {
                 soundFX.playClick();
-                onNavigateSection('projects');
+                if (onOpenOnboarding) {
+                  onOpenOnboarding();
+                } else {
+                  onNavigateSection('paths');
+                }
               }}
               className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-mono-code font-bold tracking-wide uppercase text-slate-950 bg-gradient-to-r from-cyan-400 to-sky-400 hover:shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all active:scale-95"
               data-cursor-label="START"
             >
               <Sparkles className="w-3.5 h-3.5 text-slate-950" />
-              <span>Start Learning</span>
+              <span>Personalize Path</span>
             </button>
 
             {/* Mobile Hamburger */}

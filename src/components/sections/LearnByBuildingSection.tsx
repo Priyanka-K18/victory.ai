@@ -44,7 +44,7 @@ export function validateLLMResponse(rawPayload: unknown) {
   };
 
   return (
-    <section className="relative py-28 px-4 sm:px-6 bg-[#040815] overflow-hidden">
+    <section id="learn-build" className="relative py-28 px-4 sm:px-6 bg-[#040815] overflow-hidden">
       
       <div className="max-w-7xl mx-auto relative z-10">
         

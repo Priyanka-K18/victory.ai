@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Briefcase, 
   ArrowRight, 
@@ -62,14 +62,29 @@ const CAREER_TRACKS: CareerPath[] = [
 
 export const CareerMatrixSection: React.FC = () => {
   const [selectedTrack, setSelectedTrack] = useState<CareerPath>(CAREER_TRACKS[0]);
+  const [visible, setVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) setVisible(true); },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section className="relative py-28 px-4 sm:px-6 bg-[#040715] overflow-hidden">
+    <section ref={sectionRef} id="career" className="relative py-28 px-4 sm:px-6 bg-[#040715] overflow-hidden">
+      {/* Background ambient effects */}
+      <div className="absolute top-1/3 left-10 w-[600px] h-[600px] bg-cyan-600/8 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-indigo-600/8 rounded-full blur-[150px] pointer-events-none" />
+
       
       <div className="max-w-7xl mx-auto relative z-10">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono-code mb-4">
             <Briefcase className="w-3.5 h-3.5" />
             <span>REAL-WORLD MARKET VALUE</span>
@@ -104,6 +119,11 @@ export const CareerMatrixSection: React.FC = () => {
                     ? 'bg-cyan-500/15 border-cyan-400/60 shadow-[0_0_25px_rgba(6,182,212,0.25)]'
                     : 'bg-[#060a17] border-white/10 hover:border-white/20 text-slate-400'
                 }`}
+                style={{
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? 'translateY(0)' : 'translateY(16px)',
+                  transition: `opacity 0.6s cubic-bezier(0.16,1,0.3,1) ${200 + idx * 80}ms, transform 0.6s cubic-bezier(0.16,1,0.3,1) ${200 + idx * 80}ms, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease`,
+                }}
               >
                 <div className="text-[10px] font-mono-code text-cyan-400 uppercase tracking-widest mb-1">
                   ROLE 0{idx + 1}

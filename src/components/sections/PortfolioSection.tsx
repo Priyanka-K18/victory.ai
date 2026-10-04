@@ -66,7 +66,7 @@ export const PortfolioSection: React.FC<{
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono-code mb-4">
             <Award className="w-3.5 h-3.5" />
-            <span>NIRAJAN KHADKA-INSPIRED 3D SHOWCASE</span>
+            <span>STUDENT PROOF OF WORK & 3D SHOWCASE</span>
           </div>
 
           <h2 className="text-4xl sm:text-7xl font-display font-black text-white tracking-tight uppercase mb-4 leading-tight">
@@ -92,7 +92,7 @@ export const PortfolioSection: React.FC<{
           </button>
         </div>
 
-        {/* Nirajan Khadka Style 3D Tilt Gallery Grid */}
+        {/* 3D Depth Interactive Student Project Gallery */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {customProjects.map((project) => {
             const isSelected = selectedProject.id === project.id;

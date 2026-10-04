@@ -33,6 +33,10 @@ export interface AITool {
   pricing: 'Free' | 'Freemium' | 'Paid';
   badge?: string;
   iconColor: string;
+  skillLevel?: 'Beginner' | 'Intermediate' | 'Advanced';
+  projectsUsingThisTool?: string[];
+  howToUseIt?: string[];
+  bestWorkflows?: string[];
 }
 
 export interface TaskWorkflow {

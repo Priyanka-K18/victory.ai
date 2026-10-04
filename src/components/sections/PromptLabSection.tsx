@@ -122,7 +122,7 @@ export const PromptLabSection: React.FC = () => {
   };
 
   return (
-    <section className="relative py-28 px-4 sm:px-6 bg-[#040715] overflow-hidden">
+    <section id="prompt-lab" className="relative py-28 px-4 sm:px-6 bg-[#040715] overflow-hidden">
       
       <div className="max-w-7xl mx-auto relative z-10">
         
@@ -134,9 +134,9 @@ export const PromptLabSection: React.FC = () => {
           </div>
 
           <h2 className="text-4xl sm:text-7xl font-display font-black text-white tracking-tight uppercase mb-4">
-            LEARN TO TALK <br />
+            MASTER THE WAY YOU <br />
             <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">
-              TO AI.
+              TALK TO AI.
             </span>
           </h2>
           
